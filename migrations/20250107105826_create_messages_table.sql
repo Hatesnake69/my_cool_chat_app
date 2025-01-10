@@ -2,6 +2,6 @@
 CREATE TABLE messages (
                           id SERIAL PRIMARY KEY,
                           content TEXT NOT NULL,
-                          author VARCHAR(255) NOT NULL,
+                          username VARCHAR(255) NOT NULL,
                           created_at TIMESTAMP DEFAULT NOW()
 );
