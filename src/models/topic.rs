@@ -3,16 +3,14 @@ use utoipa::ToSchema;
 
 
 #[derive(sqlx::FromRow, Serialize, Deserialize, Debug, ToSchema)]
-pub struct Message {
-    pub id: i64,
-    pub topic_id: i32,
+pub struct Topic {
+    pub id: i32,
     pub username: String,
-    pub content: String,
+    pub name: String,
     pub created_at: String,
 }
 #[derive(Deserialize, ToSchema)]
-pub struct NewMessage {
+pub struct NewTopic {
     pub username: String,
-    pub content: String,
-    pub topic_id: i32,
+    pub name: String,
 }

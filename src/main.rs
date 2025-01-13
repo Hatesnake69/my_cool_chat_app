@@ -1,5 +1,4 @@
 use actix_web::{middleware, web, App, HttpServer};
-use actix_web::body::MessageBody;
 use clap::Command;
 use db::initialize_database;
 use sqlx::migrate::Migrator;
@@ -12,7 +11,7 @@ pub mod models;
 pub mod routes;
 
 use crate::config::load_environment;
-use crate::routes::messages;
+use crate::routes::{messages, topics};
 
 static MIGRATOR: Migrator = sqlx::migrate!("./migrations");
 
@@ -22,11 +21,20 @@ static MIGRATOR: Migrator = sqlx::migrate!("./migrations");
         crate::routes::messages::get_messages,
         crate::routes::messages::post_message,
         crate::routes::messages::get_message_by_id,
-        crate::routes::messages::delete_message_by_id
+        crate::routes::messages::delete_message_by_id,
+        crate::routes::messages::get_topic,
+        crate::routes::messages::post_topic,
+        crate::routes::messages::get_topic_by_id,
+        crate::routes::messages::delete_topic_by_id,
     ),
-    components(schemas(crate::models::message::Message, crate::models::message::NewMessage)),
+    components(schemas(
+        crate::models::message::Message, crate::models::message::NewMessage,
+        crate::models::message::Topic, crate::models::message::NewTopic
+    )),
     tags(
-        (name = "Messages", description = "Message management endpoints")
+        (name = "Messages", description = "Message management endpoints"),
+        (name = "Topics", description = "Topic management endpoints")
+
     )
 )]
 struct ApiDoc;
@@ -88,6 +96,10 @@ async fn start_server() -> std::io::Result<()> {
             .service(messages::post_message)
             .service(messages::get_message_by_id)
             .service(messages::delete_message_by_id)
+            .service(topics::get_topics)
+            .service(topics::post_topic)
+            .service(topics::get_topic_by_id)
+            .service(topics::delete_topic_by_id)
             .service(setup_swagger_ui())
     })
         .bind(("127.0.0.1", 8080))?

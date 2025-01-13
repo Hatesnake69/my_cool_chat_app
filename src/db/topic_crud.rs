@@ -1,13 +1,13 @@
 use sqlx::{PgPool, Result};
-pub use crate::models::message::Message;
+pub use crate::models::topic::Topic;
 
-impl Message {
+impl Topic {
     /// Получить все сообщения, отсортированные по дате создания
     pub async fn get_all(pool: &PgPool) -> Result<Vec<Self>> {
         // Преобразуем поле `created_at` в строку в формате RFC3339 при извлечении из базы
-        let messages = sqlx::query_as::<_, Message>(
-            "SELECT id, topic_id, username, content, TO_CHAR(created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS created_at
-            FROM messages
+        let messages = sqlx::query_as::<_, Topic>(
+            "SELECT id, username, name, TO_CHAR(created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS created_at
+            FROM topics
             ORDER BY id DESC"
         )
             .fetch_all(pool)
@@ -16,22 +16,22 @@ impl Message {
         Ok(messages)
     }
 
-    /// Добавить новое сообщение
-    pub async fn add(pool: &PgPool, username: &str, content: &str) -> Result<Self> {
-        let message = sqlx::query_as::<_, Message>(
-            "INSERT INTO messages (topic_id, username, content, created_at)
-             VALUES ($1, $2, $3, NOW())
-             RETURNING id, topic_id, username, content, TO_CHAR(created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS created_at"
+    /// Добавить новое топик
+    pub async fn add(pool: &PgPool, username: &str, name: &str) -> Result<Self> {
+        let message = sqlx::query_as::<_, Topic>(
+            "INSERT INTO messages (username, name, created_at)
+             VALUES ($1, $2, NOW())
+             RETURNING id, username, name, TO_CHAR(created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS created_at"
         )
             .bind(username)
-            .bind(content)
+            .bind(name)
             .fetch_one(pool)
             .await?;
 
         Ok(message)
     }
 
-    /// Удалить сообщение по ID
+    /// Удалить топик по ID
     pub async fn delete(pool: &PgPool, id: i32) -> Result<u64> {
         let rows_affected = sqlx::query("DELETE FROM messages WHERE id = $1")
             .bind(id)
@@ -42,10 +42,10 @@ impl Message {
         Ok(rows_affected)
     }
 
-    /// Получить сообщение по ID
+    /// Получить топик по ID
     pub async fn get_by_id(pool: &PgPool, id: i32) -> Result<Option<Self>> {
-        let message = sqlx::query_as::<_, Message>(
-            "SELECT id, topic_id, username, content, TO_CHAR(created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS created_at
+        let message = sqlx::query_as::<_, Topic>(
+            "SELECT id, username, content, TO_CHAR(created_at, 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS created_at
              FROM messages WHERE id = $1"
         )
             .bind(id)

@@ -1,4 +1,5 @@
 pub mod message_crud;
+pub mod topic_crud;
 
 use sqlx::{migrate::Migrator, PgPool};
 use std::env;
